@@ -1,0 +1,26 @@
+Visualizing Co-Transcriptional Folding
+--------------------------------------
+
+Researchers often consider the structue of an RNA molecule as not only a static
+molecule, but a ready-made secondary-structure complete molecule. Too little
+thought is often given to the sequence of pairing and unpairing events that
+occur while an RNA is being transcribed. Driven by energetic, kinetic, and
+steric constraints nascent transcripts are dynamic entities that simultaneously
+populate multiple secondary structure configurations. Using tools from the
+Vienna RNA package, we calculate the population of strutures that are present
+in solution at each step in the transcription process and assign them a
+concentration relative to each other. Armed with this information, we look for
+ways to present this information in a meaningful manner that gives researchers
+a clear picture of how an RNAs structure evolves as it is elongated.
+
+The first, an animation, focuses on the sequence of pairing - unpairing events
+that occur over the course of the transcription process and result in the
+predicted minimum free energy structure. This provides an intuitive description
+of the folding process of an RNA molecule and aims to illustrate that
+large-scale rearrangements of the secondary structure can occur as it is being
+transcribed. The second is a static representation of the different structures
+and their relative concentrations at each step of transcription.  It shows how
+kinetic considerations can lead to the domination of energetically suboptimal
+structures in the population of nascent transcripts. Together, these depictions
+aim to not only portray, but to provide insight into the effects of
+thermodynamic kinetics in the process of RNA folding during transcription.
