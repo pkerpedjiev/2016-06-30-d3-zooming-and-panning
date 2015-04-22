@@ -569,7 +569,6 @@ function FornaContainer(element, passedOptions) {
     // set css for svg
     var style = svg.append('svg:style');
     $.get("../css/fornac.css", function(content){
-        console.log('content', content);
         style.text(content.replace(/[\s\n]/g, ""));
     });
     
