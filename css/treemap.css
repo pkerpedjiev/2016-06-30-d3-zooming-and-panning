@@ -18,6 +18,10 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+.axis text {
+        font-family: sans-serif;
+            font-size: 13px;
+        }
 
 .x.axis path {
   display: none;
