@@ -1,3 +1,19 @@
+ul.no-bullets {
+    list-style-type: none;
+}
+
+
+li.done:before {
+    content:"\2713\0020";
+}
+
+li.now:before {
+    content:"\2794\0020";
+}
+
+li.upcoming:before {
+    content:"\25cb\0020";
+}
 
 .reveal section img { background:none; border:none; box-shadow:none; }
 

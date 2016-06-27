@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Cotranscriptional folding</title>
+		<title>RNA Prediction and Display</title>
 
 		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
 		<meta name="author" content="Hakim El Hattab">
@@ -19,10 +19,8 @@
 
         <link rel='stylesheet' type='text/css' href='css/fornac.css' />
         <link rel='stylesheet' type='text/css' href='css/treemap.css' />
-        <script type='text/javascript' src='js/jquery.js'></script>
-        <script type='text/javascript' src='js/d3.js'></script>
-        <script type='text/javascript' src='js/fornac.js'></script>
-        <script type='text/javascript' src='js/cotranscriptional.js'></script>
+        <script type='text/javascript' src='js/lib/jquery-1.11.3.min.js'></script>
+        <script type='text/javascript' src='js/lib/d3.min.js'></script>
 
 		<!-- Code syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -48,266 +46,190 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section data-background=#ffffff>
-					<h3>Visualizing co-transcriptional folding</h3>
-                    <p>
-                    <small><a href="http://emptypipes.org">Peter Kerpedjiev</a> / <a href="http://twitter.com/pkerpedjiev">@pkerpedjiev</a></small><br>
-                    <small>TBI</small>
-                    </p>
+				<section data-background=#ffffff data-transition=none>
+					<h3>The nitty gritty of zooming in D3.js</h3>
+                    <h4>Boston D3.js User Group Meetup</h4>
+                    <small>June 30th, 2016</small><br>
+                    <small>Peter Kerpedjiev (@pkerpedjiev)</small>
 				</section>
 
-                <section data-background=#fff>
-                    <h3>A story with two plots</h3>
+				<section data-background=#ffffff data-transition=none>
+                    <h3> Why pan and zoom </h3>
+                </section>
 
-                    <div class='fragment'>
-                    <p>Co-transcriptional folding</p>
-                    <img src="img/cotranscriptional_original.jpg" width=200>
-                    </div>
-                    
-                    <div class='fragment'>
-                <p>RNA Secondary Structure Visualization</p>
-                    <div id='rna_ss1' style="width: 200px; height: 200px; margin:0 auto;"></div>
-                </div>
+                <section data-background=#ffffff data-transition=none>
+                    <svg id="fig1"></svg>
 
+                    <script>
+function figure1() {
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 20};
+    var svg = d3.select("#fig1")
+        .attr('height', 30 + margin.top + margin.bottom)
+        .attr('width', 400 + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    var xScale = d3.scale.linear()
+        .domain([0,10000])
+        .range([0,400])
+
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
+
+    gMain.append('g')
+    .call(xAxis);
+
+    var dataPoints = [1,1010,1020,5000,10000]
+    gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 10)
+    .attr('cx', function(d) { return xScale(d); });
+}
+
+                    figure1();
+
+                    </script>
 
                 </section>
 
-                <section data-background=#fff>
-                    <h3>It all began with...</h3>
-                    <br>
-                    <div class='fragment'>
-                    <p>RNA tertiary structure prediction...</p>
-                    <img src="img/1y26_2d_to_3d.png" width=600>
-                    </div>
+                <section data-background=#ffffff data-transition=none>
+                    <svg id="fig2"></svg>
+
+                    <script>
+function figure2() {
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 30};
+    var svg = d3.select("#fig2")
+        .attr('height', 30 + margin.top + margin.bottom)
+        .attr('width', 400 + margin.left + margin.right);
+
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .style('stroke', 'black')
+        .attr('height', 30 + margin.top + margin.bottom)
+        .attr('width', 400 + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    var gZoom = gMain.append('g')
+
+    var xScale = d3.scale.linear()
+        .domain([0,10000])
+        .range([0,400])
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale);
+    zoom.on('zoom', zoomed);
+    gMain.call(zoom);
+
+    //var textFormat = d3.
+
+    var translateText = gMain.append('text')
+        .attr('x', 300)
+        .attr('y', 35)
+        .text('0')
+
+    function zoomed() {
+        console.log('zoomed', zoom.translate(), zoom.scale());
+        gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)scale(' + zoom.scale() + ')')
+
+        translateText.text(zoom.translate()[0]);
+    }
+
+
+    var dataPoints = [1,1010,1020,5000,10000]
+    gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 10)
+    .attr('cx', function(d) { return xScale(d); });
+}
+
+                    figure2();
+
+                    </script>
 
                 </section>
 
-                <section data-background=#fff>
-                    <h3>Which required...</h3>
-                    <br>
-                    <div class='fragment'>
-                    <p>Simplifying known tertiary structures</p>
-                    <img src="img/1gid_3d.png" width=400>
-                </div>
-            </section>
+                <section data-background=#ffffff data-transition=none>
+                    <svg id="fig3"></svg>
 
-                <section data-background=#fff>
-                    <p>Back to secondary structures</p>
-                    <img src="img/1gid_pdb.png" width=800>
-                </section>
+                    <script>
+function figure3() {
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 30};
+    var svg = d3.select("#fig3")
+        .attr('height', 30 + margin.top + margin.bottom)
+        .attr('width', 400 + margin.left + margin.right);
 
-                <section data-background=#fff>
-                    <h3>So we made a tool</h3>
-                    <p>To convert 3D structures to 2D</p>
-                    <div class='fragment'>
-                        <img src="img/1gid_3d_to_2d.png" width=800>
-                    </div>
-                </section>
 
-                <section data-background=#fff>
-                    <h3>And...</h3>
-                    <p>To convert 1D structures to 2D</p>
-                <pre style='border=none;'>
-  >2TRA_A
-  UCCGUGAUAGUUUAAUGGUCAGAAUGGGCGCUUGUCGCGUGCCAGAUCGGGGUUCAAUUCCCCGUCGCGGAGC
-  (((((((..(((..........))).(((((.......)))))....(((((.......))))))))))))..
-                </pre>
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-                <img class='fragment' src='img/2tra.png' width=600 alt="2TRA secondary structure"/>
-            </section>
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .style('stroke', 'black')
+        .attr('height', 30 + margin.top + margin.bottom)
+        .attr('width', 400 + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
 
-                <section data-background=#fff>
-                    <h3>And...</h3>
-                    <p>To share structures online:</p>
-                    <div id='rna_ss2' style="width: 300px; height: 300px; margin:0 auto;"></div>
-                </section>
+    var gZoom = gMain.append('g')
 
-                <section data-background=#fff>
-                    <h3>And...</h3>
-                    <p>We called it <b>forna</b></p>
-                    <img src='img/forna_logo.png'>
-                    <div class='fragment'>
-                        <p>And you can use it freely at:</p>
+    var xScale = d3.scale.linear()
+        .domain([0,10000])
+        .range([0,400])
 
-                        <a href="http://rna.tbi.univie.ac.at/~forna">http://rna.tbi.univie.ac.at/~forna</a>
-                    </div>
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
 
-                </section>
+    var gXAxis = gZoom.append('g');
 
-                <section data-background=#fff>
-                    <h3>Meanwhile...</h3>
-                </section>
+    gXAxis.call(xAxis);
 
-                <section data-background=#fff>
-                    <h3>A question burned...</h3>
+    var zoom = d3.behavior.zoom()
+        .x(xScale);
+    zoom.on('zoom', zoomed);
+    gMain.call(zoom);
 
-                    <p class='fragment'>What happens to the structure of an RNA as it's being transcribed?</p>
+    function zoomed() {
+        console.log('zoomed', zoom.translate(), zoom.scale());
+        gXAxis.call(xAxis);
+        //gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)scale(' + zoom.scale() + ')')
+        gZoom.selectAll('circle')
+            .attr('cx', (d) => xScale(d))
+    }
 
-                </section>
 
-                <section data-background=#fff data-state="fold_at_end">
-                    <h3>Does it fold at the end?</h3>
+    var dataPoints = [1,1010,1020,5000,10000]
+    gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 10)
+    .attr('cx', function(d) { return xScale(d); });
+}
 
-                    <div class='fragment'>
-                    <div id='rna_ss3' style="width: 400px; height: 400px; margin:0 auto;"></div>
-                </div>
+                    figure3();
+
+                    </script>
 
                 </section>
-
-                <section data-background=#fff data-state="fold_during_transcription">
-                    <h3>Or during transcription?</h3>
-                    <div class='fragment'>
-                    <div id='rna_ss4' style="width: 400px; height: 400px; margin:0 auto;"></div>
-                </div>
-                </section>
-
-                <section data-background=#fff>
-                    <h3>Most would agree</h3>
-                    Transcription not only begins during transcription, but... 
-                </section>
-
-                <section data-background=#fff>
-                    <h5>A visualization of co-transcriptional folding</h5>
-                    <div class='fragment'>
-                    <div id='rna_ss5'></div>
-                </div>
-                </section>
-
-                <section data-background=#fff>
-                    <h3>Why?</h3>
-
-                    <ul>
-                        <li class='fragment'>To See</li>
-                        <li class='fragment'>To Understand</li>
-                        <li class='fragment'>To Share</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <div style='width: 300px; margin:0 auto;'>
-                    <pre class='fragment'>
-....................
-                    </pre>
-                    <pre class='fragment'>
-.((((((......)))).)).
-                    </pre>
-                    <pre class='fragment'>
-(((((((......)))).))).
-                    </pre>
-                    <pre class='fragment'>
-(((((((......)))).)))..
-                    </pre>
-                </div>
-                </section>
-
-                <section data-background=#ffffff>
-                    <h2>Drawing Secondary Structures</h2>
-                <p>Why do we make secondary structure diagrams?</p>
-
-                <ul>
-                <li class='fragment'>To See</li>
-                <li class='fragment'>To Simplify</li>
-                <li class='fragment'>To Share</li>
-                </ul>
-            </section>
-
-            <section data-background=#fff>
-                How does RNA come into being?
-
-                It is transcribed
-
-                (animation of nucleotides coming together)
-
-                Then it folds into its secondary structure.
-
-                (animation of secondary structure coming together)
-
-            </section>
-
-                <section data-background=#fff>
-                <p>What do this sequence and secondary structure represent?</p>
-
-                <pre style='border=none;'>
-  >2TRA_A
-  UCCGUGAUAGUUUAAUGGUCAGAAUGGGCGCUUGUCGCGUGCCAGAUCGGGGUUCAAUUCCCCGUCGCGGAGC
-  (((((((..(((..........))).(((((.......)))))....(((((.......))))))))))))..
-                </pre>
-
-                <img class='fragment' src='img/2tra.png' width=600 alt="2TRA secondary structure"/>
-                </section>
-
-                <section data-background=#fff>
-                <p>Why do we make secondary structure diagrams?</p>
-                <img src='img/2tra.png' width=600 alt="2TRA secondary structure"/>
-                <p class='fragment'><b>To see</b> patterns that are otherwise hard to perceive.</p>
-                </section>
-                <section data-background=#fff>
-                <p>What does this represent?</p>
-                <img src='img/1gid_3d.png' height=300 alt="1GID 3D Model"/>
-                <img class='fragment' src='img/1gid_pdb.png' height=350 alt="1GID secondary structure"/>
-                </section>
-
-                <section data-background=#fff>
-                <p>Why do we make secondary structure diagrams?</p>
-                <img src='img/1gid_3d.png' height=300 alt="1GID 3D Model"/>
-                <img src='img/1gid_pdb.png' height=350 alt="1GID secondary structure"/>
-                <p class='fragment'><b>To simplify</b> information by removing extraneous or overwhelming detail.</p>
-                </section>
-
-                <section data-background=#fff>
-                <p>What can we learn from this image?</p>
-                <img src='img/cd_box.png' height=400 alt="C/D box RNA"/>
-                </section>
-
-                <section data-background=#fff>
-                <p>Why do we make secondary structure diagrams?</p>
-                <img src='img/cd_box.png' height=400 alt="C/D box RNA"/>
-                <p class='fragment'><b>To share</b> information with others in a concise, directed manner.</p>
-                </section>
-
-
-                <section data-background=#ffffff>
-                    <h2>WTF is Forna?</h2>
-
-                    <div class='fragment'>
-                        <p>
-                    <b>forna</b> is a super-simple tool for drawing secondary structures. </p>
-                    <video class='fragment' height="400" controls>
-                    <!-- source src="mov/usage.webm" type="video/webm" -->
-                    Your browser does not support the video tag.
-                    </video>
-                </div>
-                </section>
-
-                <section data-background=#ffffff>
-                    <img src='img/forna_screenshot_3q1q.png' class='fragment'>
-                </section>
-
-                    <section data-background=#fff>
-                    <p> How should we make secondary structure diagrams? </p>
-                    <p class='fragment'><b>Interactively</b> - Changing a given structure should be easy, intuitive and flexible. </p>
-                    <video class='fragment' height="400" controls>
-                    <!-- source src="mov/usage.webm" type="video/webm" -->
-                    Your browser does not support the video tag.
-                    </video>
-                    </section>
 
 			</div>
-
 		</div>
-                    <script type='text/javascript'>
-var container1 = new FornaContainer("#rna_ss1",
-        {'applyForce': false, 'allowPanningAndZooming': true});
-var container2 = new FornaContainer("#rna_ss2",
-        {'applyForce': false, 'allowPanningAndZooming': true});
-
-var options = {'structure': '((..((....)).(((....))).))',
-    'sequence': 'CGCUUCAUAUAAUCCUAAUGACCUAU'
-};
-
-container1.addRNA(options.structure, options);
-container2.addRNA(options.structure, options);
-                    </script>
 
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
@@ -321,6 +243,8 @@ container2.addRNA(options.structure, options);
 				progress: true,
 				history: true,
 				center: true,
+                minScale: 1,
+                maxScale: 1,
 
 				transition: 'slide', // none/fade/slide/convex/concave/zoom
 
@@ -337,25 +261,7 @@ container2.addRNA(options.structure, options);
 
 		</script>
                     <script type='text/javascript'>
-var structs = ['(.).', '(.)..', '(.)...', '(.)....'].reverse();
-var structs = [".","..","...","....",".....","......",".......","........",".........","..........","...........","............",".............","..............","...............","................",".................","..................","...................","....................",".....................","......................",".......................","........................",".........................","..........................","...........................","............................",".............................","..............................","...............................","................................",".................................","..................................","...................................","....................................",".....................................","......................................",".......................................","........................................",".........................................","..........................................","...........................................","............................................",".............................................","..............................................","...............................................","................................................",".................................................","..................................................","...................................................","....................................................",".....................................................","......................................................",".......................................................","........................................................",".........................................................","..........................................................","...........................................................","............................................................",".............................................................","..............................................................","...............................................................","................................................................",".................................................................","..................................................................","...................................................................","....................................................................",".....................................................................","......................................................................","...........(((((.....)))))....((((((((((((((((....))))))))))))))))....."].reverse()
-Reveal.addEventListener( 'fold_at_end', function() {
-doStepwiseAnimation("#rna_ss3", structs, 100);
-            } );
 
-d3.csv('data/pete.trajectory', function(data) {                                                                           
-        console.log('data', data);                                                                              
-        var structs = data.filter(function(d) { return +d.j === 1; }).map(function(d) { return d.struct; });        
-        console.log('structs', structs);                                                                        
-        //structs = structs.splice(0,10)                                                                        
-        structs.reverse();                                                                                      
-
-        Reveal.addEventListener( 'fold_during_transcription', function() {
-                doStepwiseAnimation("#rna_ss4", structs, 300);
-                } );
-        });
-
-        createCotranscriptionalTreemap('#rna_ss5', 'data/pete.nxy');
                     </script>
 
 	</body>
