@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>RNA Prediction and Display</title>
+		<title>D3 Panning and Zooming</title>
 
 		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
 		<meta name="author" content="Hakim El Hattab">
@@ -17,8 +17,6 @@
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css" id="theme">
 
-        <link rel='stylesheet' type='text/css' href='css/fornac.css' />
-        <link rel='stylesheet' type='text/css' href='css/treemap.css' />
         <script type='text/javascript' src='js/lib/jquery-1.11.3.min.js'></script>
         <script type='text/javascript' src='js/lib/d3.min.js'></script>
 
@@ -54,25 +52,68 @@
 				</section>
 
 				<section data-background=#ffffff data-transition=none>
-                    <h3> Why pan and zoom </h3>
+                    <h3> Why would we want to pan and zoom?</h3>
+                    <ul>
+                        <li class='fragment'>Display details</li>
+                        <li class='fragment'>Display overview</li>
+                    </ul>
+                </section>
+
+				<section data-background=#ffffff data-transition=none>
+                    <h3>Why am I talking about panning and zooming?</h3>
+                    <ul>
+                        <li class='fragment'>It's useful</li>
+                        <li class='fragment'>It's interesting</li>
+                        <li class='fragment'>It ties together a number of key D3 concepts</li>
+                        <ul>
+                            <li class='fragment'>Linear scales</li>
+                            <li class='fragment'>Transforms (translate, scale)</li>
+                            <li class='fragment'>Events</li>
+                        </ul>
+                    </ul>
+                </section>
+
+				<section data-background=#ffffff data-transition=none>
+                    <h3> How should we pan and zooming?</h3>
+                    <ul>
+                        <li class='fragment'>Geometric Zooming</li>
+                        <li class='fragment'>Semantic Zooming</li>
+                    </ul>
                 </section>
 
                 <section data-background=#ffffff data-transition=none>
-                    <svg id="fig1"></svg>
+                    <h3>Example:</h3>
+                    Let's plot 4 points:
+                    <p class='mono'>[1,1010,1020,5000]</p>
+                    <br>
+                    <div class='centered'>
+                        <svg class="fig1"></svg>
+                    </div>
 
                     <script>
 function figure1() {
     var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 20};
-    var svg = d3.select("#fig1")
-        .attr('height', 30 + margin.top + margin.bottom)
-        .attr('width', 400 + margin.left + margin.right);
+    var width = 400, height=60;
+    var svg = d3.selectAll(".fig1")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
 
     var gMain = svg.append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     var xScale = d3.scale.linear()
-        .domain([0,10000])
-        .range([0,400])
+        .domain([0,5000])
+        .range([0,width])
+
+    var dataPoints = [1,1010,1020,5000];
+
+    gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+    .attr('cx', function(d) { return xScale(d); });
+
 
     var xAxis = d3.svg.axis()
     .scale(xScale)
@@ -80,33 +121,106 @@ function figure1() {
     .orient('bottom')
 
     gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,20)')
     .call(xAxis);
 
-    var dataPoints = [1,1010,1020,5000,10000]
-    gMain.selectAll('circle')
-    .data(dataPoints)
-    .enter()
-    .append('circle')
-    .attr('r', 10)
-    .attr('cx', function(d) { return xScale(d); });
 }
-
-                    figure1();
-
                     </script>
 
                 </section>
 
                 <section data-background=#ffffff data-transition=none>
-                    <svg id="fig2"></svg>
+                    <h3>Example:</h3>
+                    Let's plot 4 points:
+                    <pre>
+                    <code>
+    // create the svg
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 20};
+    var width = 400, height=60;
+    var svg = d3.selectAll(".fig1")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    // create a container that will hold all of the graphics
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                    </code>
+                    </pre>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Example:</h3>
+                    Let's plot 4 points:
+                    <pre>
+                    <code>
+    // create a scale for the data points
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([0,width])
+
+    // the actual data we want to plot
+    var dataPoints = [1,1010,1020,5000];
+
+    // create 'circle' svg elements for each point
+    gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+    .attr('cx', function(d) { return xScale(d); });
+                    </code>
+                    </pre>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Example:</h3>
+                    Let's plot 4 points:
+                    <pre>
+                    <code>
+    // add an axis
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,20)')
+    .call(xAxis);
+                    </code>
+                    </pre>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Problem</h3>
+                    <p>
+                    Difficult to distinguish the points at positions 1010 and 1020.
+                    </p>
+                    <br>
+                    <div class='centered'>
+                        <svg class="fig1"></svg>
+                    </div>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Solution 1</h3>
+                    <p>
+                    Zoom in by magnifying the picture...
+                    </p>
+                    <br>
+                    <div class='centered'>
+                        <svg id="fig2"></svg>
+                    </div>
 
                     <script>
 function figure2() {
     var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 30};
+    var width = 400;
+    var height = 60;
     var svg = d3.select("#fig2")
-        .attr('height', 30 + margin.top + margin.bottom)
-        .attr('width', 400 + margin.left + margin.right);
-
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
 
     var gMain = svg.append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -114,51 +228,579 @@ function figure2() {
     gMain.append('rect')
         .classed('zoom-rect', true)
         .style('fill', 'transparent')
-        .style('stroke', 'black')
-        .attr('height', 30 + margin.top + margin.bottom)
-        .attr('width', 400 + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
         .attr('x', -margin.left)
         .attr('y', -margin.top)
 
-    var gZoom = gMain.append('g')
-
     var xScale = d3.scale.linear()
-        .domain([0,10000])
+        .domain([0,5000])
         .range([0,400])
 
+    var gZoom = gMain.append('g')
+
     var zoom = d3.behavior.zoom()
-        .x(xScale);
-    zoom.on('zoom', zoomed);
+        .x(xScale)
+        .on('zoom', zoomed);
+
     gMain.call(zoom);
 
-    //var textFormat = d3.
-
-    var translateText = gMain.append('text')
-        .attr('x', 300)
-        .attr('y', 35)
-        .text('0')
-
     function zoomed() {
-        console.log('zoomed', zoom.translate(), zoom.scale());
         gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)scale(' + zoom.scale() + ')')
-
-        translateText.text(zoom.translate()[0]);
     }
 
-
-    var dataPoints = [1,1010,1020,5000,10000]
+    var dataPoints = [1,1010,1020,5000]
     gZoom.selectAll('circle')
     .data(dataPoints)
     .enter()
     .append('circle')
-    .attr('r', 10)
+    .attr('r', 11)
     .attr('cx', function(d) { return xScale(d); });
+
+    // add an axis
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,20)')
+    .call(xAxis);
 }
 
                     figure2();
 
                     </script>
 
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Code:</h3>
+                    <pre>
+                    <code class='mine'>
+    var gZoom = gMain.append('g')
+
+    var zoom = d3.behavior.zoom()
+        .on('zoom', function() {
+            gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)
+                                     scale(' + zoom.scale() + ')')
+        });
+    gMain.call(zoom);
+
+    var dataPoints = [1,1010,1020,5000]
+    gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+    .attr('cx', function(d) { return xScale(d); });
+                    </code>
+                    </pre>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>How did that work?</h3>
+                        <pre>
+                    <code class='mine'>
+    var zoom = d3.behavior.zoom()
+        .on('zoom', function() {
+            gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)
+                                     scale(' + zoom.scale() + ')')
+        });
+                    </code>
+
+                        </pre>
+                    <p>The part of the plot with the circles is translated and scaled to give the appearance of zooming in and out</p>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Solution 1</h3>
+                    <p>
+                    Zoom in by magnifying the picture...
+                    </p>
+                    <br>
+                    <div class='centered'>
+                        <svg id="figGeometricZoom"></svg>
+                    </div>
+
+
+
+                    <script>
+function figGeometricZoom() {
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 30};
+    var width = 400;
+    var height = 60;
+    var svg = d3.select("#figGeometricZoom")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([0,400])
+
+    var zoomText = gMain.append('text')
+        .attr('x', 150)
+        .attr('y', 75)
+        .text('translate: 0.0 scale: 1');
+
+    var gZoom = gMain.append('g')
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed);
+
+    gMain.call(zoom);
+    var format = d3.format(".2f")
+
+    function zoomed() {
+        gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)scale(' + zoom.scale() + ')')
+        zoomText.text('translate: ' + format(zoom.translate()[0]) + ' scale: ' + format(zoom.scale()));
+    }
+
+    var dataPoints = [1,1010,1020,5000]
+    gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+    .attr('cx', function(d) { return xScale(d); });
+
+    // add an axis
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,20)')
+    .call(xAxis);
+}
+
+                    figGeometricZoom();
+                    </script>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Geometric Zoom</h3>
+                    <p>Advantages:</p>
+                    <ul>
+                        <li>Simple</li>
+                        <li>Can increase the size of small details</li>
+                    </ul>
+                    <p>Disadvantages</p>
+                    <ul>
+                        <li>Leads to oversized glyphs</li>
+                        <li>Doesn't resolve overlapping data</li>
+                    </ul>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Can we do better?</h3>
+                    <p>
+                    <ul>
+                        <li class='fragment'>Keep circles the same size</li>
+                        <li class='fragment'>Increase the distance between them when zooming</li>
+                    </ul>
+                    </p>
+                    <br>
+                    <div class='centered fragment'>
+                        <svg id="figSemanticZoom"></svg>
+                    </div>
+
+                    <p class='fragment'>This is <b>semantic zooming</b></p>
+
+
+
+                    <script>
+function figSemanticZoom() {
+    var margin = {'left': 20, 'top': 20, 'bottom': 20, 'right': 30};
+    var width = 400;
+    var height = 60;
+    var svg = d3.select("#figSemanticZoom")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([0,400])
+
+    var zoomText = gMain.append('text')
+        .attr('x', 150)
+        .attr('y', 75)
+        .text('translate: 0.0 scale: 1');
+
+    var gZoom = gMain.append('g')
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed);
+
+    gMain.call(zoom);
+    var format = d3.format(".2f")
+
+    var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('bottom')
+
+    var gAxis = gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,20)')
+
+    var dataPoints = [1,1010,1020,5000]
+    var circles = gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+
+    function zoomed() {
+        //gZoom.attr('transform', 'translate(' + zoom.translate()[0] + ',0)scale(' + zoom.scale() + ')')
+        zoomText.text('translate: ' + format(zoom.translate()[0]) + ' scale: ' + format(zoom.scale()));
+
+        gAxis.call(xAxis);
+        circles.attr('cx', function(d) { return xScale(d); });
+    }
+
+
+    // add an axis
+    zoomed();
+}
+
+                    figSemanticZoom();
+                    </script>
+
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>How did that work?</h3>
+                    <p>Circles are repositioned at each zoom <b>event</b></p>
+            <pre><code>
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed);
+
+    function zoomed() {
+        gAxis.call(xAxis);
+        circles.attr('cx', function(d) { return xScale(d); });
+    }
+            </pre></code>
+    <p class='fragment'>The zoom behavior changes the linear scale (xScale) and we use that to calculate new positions for each circle.</p> 
+
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>What?</h3>
+                    <p class='fragment'>Let's take a step back...</p>
+
+    <pre class='fragment'><code>
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([0,400])
+
+    ...
+
+    gZoom.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 11)
+    .attr('cx', function(d) { return xScale(d); });
+    </pre></code>
+    <p>We used a linear scale to convert the point's positions (from 0 to 5000) to positions in our viewport (from 0 to 400 pixels)</p>
+                    
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                <h3>Linear Scales:</h3>
+    <pre><code>
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([100,500])
+    </pre></code>
+                <p>Map a <b>domain</b> interval to a <b>range</b> interval</p>
+                <br>
+                    <div class='centered'>
+                        <svg class="figLinearScale"></svg>
+                    </div>
+                    <p class='fragment'> So a point with value 0 has a position... <span class='fragment'>100</span></p>
+                    <p class='fragment'> And a point with value 2500 has a position... <span class='fragment'>300</span></p>
+
+                    <script>
+function figLinearScale() {
+    var margin = {'left': -80, 'top': 55, 'bottom': 20, 'right': 20};
+    var width = 500, height=70;
+    var svg = d3.selectAll(".figLinearScale")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', -35)
+    .attr('text-anchor', 'middle')
+    .text('Domain')
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', 80)
+    .attr('text-anchor', 'middle')
+    .text('Range')
+
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([100,500])
+
+    var xTopScale = d3.scale.linear()
+        .domain([100,500])
+        .range([100,500])
+
+    var xAxis = d3.svg.axis()
+    .scale(xTopScale)
+    .ticks(3)
+    .orient('bottom')
+
+    var xTopAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('top')
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,30)')
+    .call(xAxis);
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .call(xTopAxis);
+
+}
+
+figLinearScale();
+                    </script>
+                </section>
+
+                
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Zooming and Linear Scales</h3>
+                    <p>Zooming can change the domain of an associated scale:</p>
+                    <pre><code>
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed);
+                    </code></pre>
+                    <br>
+                    <div class='centered'>
+                        <svg class="figZoomableLinearScale"></svg>
+                    </div>
+
+                    <script>
+function figZoomableLinearScale() {
+    var margin = {'left': -80, 'top': 55, 'bottom': 20, 'right': 20};
+    var width = 500, height=70;
+    var svg = d3.selectAll(".figZoomableLinearScale")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', -35)
+    .attr('text-anchor', 'middle')
+    .text('Domain')
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', 80)
+    .attr('text-anchor', 'middle')
+    .text('Range')
+
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([100,500])
+
+    var xTopScale = d3.scale.linear()
+        .domain([100,500])
+        .range([100,500])
+
+    var xAxis = d3.svg.axis()
+    .scale(xTopScale)
+    .ticks(3)
+    .orient('bottom')
+
+    var xTopAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('top')
+
+    var dataPoints = [1,1010,1020,5000];
+
+    var circles = gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 8)
+    .attr('cy', 15)
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,30)')
+    .call(xAxis);
+
+    var gAxis = gMain.append('g')
+    .classed('x axis', true)
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed)
+        .scaleExtent([1,100]);
+
+    gMain.call(zoom);
+
+    function zoomed() {
+        gAxis.call(xTopAxis);
+        circles.attr('cx', (d) => { return xScale(d); });
+    }
+
+    zoomed();
+
+}
+
+                    </script>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Another way of looking at it</h3>
+                    <p>Zooming increases the size of the viewport relative to the data</p>
+                    <br>
+                    <div class='centered'>
+                        <svg class="figZoomableLinearScale"></svg>
+                    </div>
+
+                    <div class='centered'>
+                        <svg class="figZoomingViewport"></svg>
+                    </div>
+
+                    <script>
+function figZoomingViewport() {
+    var margin = {'left': -80, 'top': 55, 'bottom': 20, 'right': 20};
+    var width = 500, height=70;
+    var svg = d3.selectAll(".figZoomingViewport")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', -35)
+    .attr('text-anchor', 'middle')
+    .text('Domain')
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', 80)
+    .attr('text-anchor', 'middle')
+    .text('Range')
+
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([100,500])
+
+    var xTopScale = d3.scale.linear()
+        .domain([100,500])
+        .range([100,500])
+
+    var xAxis = d3.svg.axis()
+    .scale(xTopScale)
+    .ticks(3)
+    .orient('bottom')
+
+    var xTopAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('top')
+
+    var dataPoints = [1,1010,1020,5000];
+
+    var circles = gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 8)
+    .attr('cy', 15)
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,30)')
+    .call(xAxis);
+
+    var gAxis = gMain.append('g')
+    .classed('x axis', true)
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed)
+        .scaleExtent([1,100]);
+
+    gMain.call(zoom);
+
+    function zoomed() {
+        gAxis.call(xTopAxis);
+        circles.attr('cx', (d) => { return xScale(d); });
+    }
+
+    zoomed();
+
+}
+
+figZoomingViewport();
+                    </script>
                 </section>
 
                 <section data-background=#ffffff data-transition=none>
@@ -262,6 +904,8 @@ function figure3() {
 		</script>
                     <script type='text/javascript'>
 
+                        figure1();
+figZoomableLinearScale();
                     </script>
 
 	</body>
