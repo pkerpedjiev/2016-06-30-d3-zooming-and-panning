@@ -89,7 +89,7 @@
                         <ul>
                             <li class='fragment'>50 pixels from the top of the enclosing div</li>
                             <li class='fragment'>30 pixels from the bottom of the window</li>
-                            <li class='fragment'>From 10 to 30 pixels to the right</li>
+                            <li class='fragment'>From 10 to 30 pixels from the right end of the div</li>
                         </ul>
                     </ul>
                     </ul>
@@ -994,17 +994,16 @@ figZoomingViewport();
                 </section>
 
                 <section data-background=#ffffff data-transition=none>
-                    <h3>Question</h3>
-                    <p>If we want to zoom to the domain [0,2000], which translate and scale do we need? </p>
-                    <br>
+                    <h3>Answer</h3>
+                    <p>If we want to zoom to the domain [0,2000], which translate and scale do we need? We need a scale of 2.5 and a translate of -150.</p>
 
                     <pre>
                     <code>
-                    xScale = d3.scale.linear().domain([0,5000]).range([100,500])
-                    zoom = d3.behavior.zoom().x(xScale)
-                    zoom.scale(2.5)
-                    zoom.translate(-150)
-                    console.log(xScale.domain()) // [0,2000]
+            xScale = d3.scale.linear().domain([0,5000]).range([100,500])
+            zoom = d3.behavior.zoom().x(xScale)
+            zoom.scale(2.5)
+            zoom.translate(-150)
+            console.log(xScale.domain()) // [0,2000]
                     </code>
                     </pre>
 
@@ -1128,11 +1127,213 @@ function figZoomingTransformAndScale() {
 
 figZoomingTransformAndScale();
                     </script>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Question</h3>
+                    <p>If we want to constrain the visible area to the domain [0,5000], how do we do it?</p>
+                    <br>
+
+                    <div class='centered'>
+                        <svg class="figConstrainedZooming"></svg>
+                    </div>
+                    <p>Remember that the original
+                    xScale had a domain of [0,5000] and a range of [100,500].</p>
                 </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Answer 1</h3>
+                    <p>Limit the translate and scale within the 'zoomed' function.</p>
+
+
+                    <code><pre>
+    var constrainedDomain = [0,2000]
+
+    function zoomed() {
+        var min_scale = (origXScale.domain()[1] - origXScale.domain()[0]) / 
+                (constrainedDomain[1] - constrainedDomain[0]);
+
+        if (zoom.scale() < min_scale)
+            zoom.scale(min_scale);
+
+        var max_translate = xScale.range()[0] - zoom.scale() * origXScale(constrainedDomain[0]) ;
+        if (zoom.translate()[0] > max_translate )
+            zoom.translate([max_translate, 0]);
+
+        var min_translate = xScale.range()[1] - zoom.scale() * origXScale(constrainedDomain[1]);
+        if (zoom.translate()[0] < min_translate )
+            zoom.translate([min_translate, 0]);
+            </code></pre>
+
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Answer 2</h3>
+                    <p>Use D3 v4</p>
+
+
+                    <code><pre>
+        zoom.translateExtent([[0,0],[2000,0]])
+            </code></pre>
+
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Summary</h3>
+                    <ul>
+                        <li class='fragment'>Linear scale</li>
+                        <li class='fragment'>Geometric zoom</li>
+                        <li class='fragment'>Semantic zoom</li>
+                        <li class='fragment'>Translation, scale</li>
+                        <li class='fragment'>Linear scale rescaling</li>
+                    </ul>
+                    <p class='fragment'>D3 v4 introduces a number of changes but the general idea is the same:</p>
+                    <pre class='fragment'>
+                        x_new = translate_x + scale * x_old
+                    </pre>
+                </section>
+
+                <section data-background=#ffffff data-transition=none>
+                    <h3>Thanks to Bocoup for hosting!</h3>
+                </section>
+
+
+                    <script>
+function figConstrainedZooming() {
+    var margin = {'left': -80, 'top': 55, 'bottom': 20, 'right': 20};
+    var width = 500, height=200;
+    var svg = d3.selectAll(".figConstrainedZooming")
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right);
+
+    var gMain = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    gMain.append('rect')
+        .classed('zoom-rect', true)
+        .style('fill', 'transparent')
+        .attr('height', height + margin.top + margin.bottom)
+        .attr('width', width + margin.left + margin.right)
+        .attr('x', -margin.left)
+        .attr('y', -margin.top)
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', -35)
+    .attr('text-anchor', 'middle')
+    .text('Domain')
+
+    gMain.append('text')
+    .attr('x', 200)
+    .attr('y', 130)
+    .attr('text-anchor', 'middle')
+    .text('Range')
+    var xScale = d3.scale.linear()
+        .domain([0,5000])
+        .range([100,500])
+
+    var origXScale = xScale.copy()
+
+    var xTopScale = d3.scale.linear()
+        .domain([100,500])
+        .range([100,500])
+
+    var zoom = d3.behavior.zoom()
+        .x(xScale)
+        .on('zoom', zoomed)
+        .scaleExtent([1,100]);
+
+    var xAxis = d3.svg.axis()
+    .scale(xTopScale)
+    .ticks(3)
+    .orient('bottom')
+
+    var xTopAxis = d3.svg.axis()
+    .scale(xScale)
+    .ticks(3)
+    .orient('top')
+
+    var dataPoints = [1,1010,1020,5000];
+
+    var circles = gMain.selectAll('circle')
+    .data(dataPoints)
+    .enter()
+    .append('circle')
+    .attr('r', 3)
+    .attr('cy', 0)
+
+    gMain.append('g')
+    .classed('x axis', true)
+    .attr('transform', 'translate(0,80)')
+    .call(xAxis);
+
+    var gAxis = gMain.append('g')
+    .classed('x axis', true)
+
+
+    gMain.call(zoom);
+
+    gAxis.call(xTopAxis);
+
+    var line1 = gMain.append('line')
+        .attr('x1', 100)
+        .attr('y1', 80)
+        .attr('x2', 100)
+        .attr('y2', 0)
+        .style('stroke', 'black')
+        .style('strok-width', '1px')
+
+    var line2 = gMain.append('line')
+        .attr('x1', 500)
+        .attr('y1', 80)
+        .attr('x2', 500)
+        .attr('y2', 0)
+        .style('stroke', 'black')
+        .style('strok-width', '1px')
+
+    var zoomText = gMain.append('text')
+        .attr('x', 150)
+        .attr('y', 155)
+        .text('translate: 0.0 scale: 1');
+
+    var format = d3.format(".2f")
+
+    var constrainedDomain = [0,2000]
+
+    function zoomed() {
+        var min_scale = (origXScale.domain()[1] - origXScale.domain()[0]) / (constrainedDomain[1] - constrainedDomain[0]);
+
+        if (zoom.scale() < min_scale)
+            zoom.scale(min_scale);
+
+        var max_translate = xScale.range()[0] - zoom.scale() * origXScale(constrainedDomain[0]) ;
+        if (zoom.translate()[0] > max_translate )
+            zoom.translate([max_translate, 0]);
+
+        var min_translate = xScale.range()[1] - zoom.scale() * origXScale(constrainedDomain[1]);
+        if (zoom.translate()[0] < min_translate )
+            zoom.translate([min_translate, 0]);
+
+
+
+        //gAxis.call(xTopAxis);
+        circles.attr('cx', (d) => { return origXScale(d); });
+        line1.attr('x2', origXScale(xScale.invert(100)));
+        line2.attr('x2', origXScale(xScale.invert(500)));
+
+        zoomText.text('translate: ' + format(zoom.translate()[0]) + ' scale: ' + format(zoom.scale()));
+    }
+
+    zoomed();
+
+}
+
+figConstrainedZooming();
+                    </script>
 
 
 			</div>
 		</div>
+
 
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
